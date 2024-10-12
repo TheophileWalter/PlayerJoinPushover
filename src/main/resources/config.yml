@@ -1,0 +1,9 @@
+pushover:
+  user_key: "you_user_key"
+  api_token: "you_api_token"
+  login_notification: "true"
+  logout_notification: "true"
+  login_title: "Login on {server}"
+  login_message: "{player} has joined the server!"
+  logout_title: "Logout from {server}"
+  logout_message: "{player} has left the server."

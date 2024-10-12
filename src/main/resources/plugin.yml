@@ -1,0 +1,4 @@
+name: PlayerJoinPushover
+main: tw.walter.PlayerJoinPushover
+version: 1.0
+api-version: 1.20
