@@ -2,6 +2,7 @@ package tw.walter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -15,6 +16,8 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.json.JSONObject;
@@ -73,15 +76,19 @@ public class PlayerJoinPushover extends JavaPlugin implements Listener {
     }
 
     private void loadConfig() {
-        FileConfiguration config = getConfig();
-        userKey = config.getString("pushover.user_key");
-        apiToken = config.getString("pushover.api_token");
-        loginNotification = config.getBoolean("pushover.login_notification");
-        logoutNotification = config.getBoolean("pushover.logout_notification");
-        loginTitle = config.getString("pushover.login_title");
-        loginMessage = config.getString("pushover.login_message");
-        logoutTitle = config.getString("pushover.logout_title");
-        logoutMessage = config.getString("pushover.logout_message");
+        try (InputStreamReader reader = new InputStreamReader(new FileInputStream("plugins/PlayerJoinPushover/config.yml"), StandardCharsets.UTF_8)) {
+            FileConfiguration config = YamlConfiguration.loadConfiguration(reader);
+            userKey = config.getString("pushover.user_key");
+            apiToken = config.getString("pushover.api_token");
+            loginNotification = config.getBoolean("pushover.login_notification");
+            logoutNotification = config.getBoolean("pushover.logout_notification");
+            loginTitle = config.getString("pushover.login_title");
+            loginMessage = config.getString("pushover.login_message");
+            logoutTitle = config.getString("pushover.logout_title");
+            logoutMessage = config.getString("pushover.logout_message");
+        } catch (IOException e) {
+            getLogger().severe("Failed to load configuration: " + e.getMessage());
+        }
     }
 
     private void sendPushoverNotification(String title, String message) {
@@ -95,10 +102,11 @@ public class PlayerJoinPushover extends JavaPlugin implements Listener {
             json.put("user", userKey);
             json.put("message", message);
             json.put("title", title);
+            json.put("html", 1);
 
-            StringEntity entity = new StringEntity(json.toString());
+            StringEntity entity = new StringEntity(json.toString(), StandardCharsets.UTF_8);
             post.setEntity(entity);
-            post.setHeader("Content-type", "application/json");
+            post.setHeader("Content-type", "application/json; charset=UTF-8");
             client.execute(post);
         } catch (Exception e) {
             getLogger().severe("Failed to send Pushover notification: " + e.getMessage());
